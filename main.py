@@ -4,7 +4,7 @@ import numpy as np
 
 from nn.activations.sigmoid import Sigmoid
 from nn.layers.linear import Linear
-from nn.losses.cross_entropy_loss import CrossEntropyLoss
+from nn.losses import CrossEntropyLoss
 from nn.optim.sgd import SGD
 
 # Global references so accuracy() can access the trained model weights
@@ -84,11 +84,11 @@ def accuracy(loss_history: list[float] = None) -> float:
         train()
 
     X, y = toy_data()
-    
+
     # Run evaluation forward pass
     z = _layer.forward(X)
     predictions = _activation.forward(z)
-    
+
     # Threshold predictions at 0.5 for binary classification metrics
     pred_labels = (predictions >= 0.5).astype(float)
     return float(np.mean(pred_labels == y))
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     print("Starting training convergence test on AND-gate dataset...")
     history = train(epochs=4000, lr=1.0)
     final_acc = accuracy(history)
-    
+
     print(f"Initial Epoch Loss: {history[0]:.4f}")
     print(f"Final Epoch Loss:   {history[-1]:.4f}")
     print(f"Final Model Accuracy: {final_acc * 100.0:.1f}%")
