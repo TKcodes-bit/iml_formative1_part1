@@ -1,10 +1,10 @@
-"""Categorical cross-entropy loss, for one-hot multi-class targets."""
+"""Binary cross-entropy loss."""
 
 import numpy as np
 
 
-class CategoricalCrossEntropyLoss:
-    """Categorical cross-entropy loss over C classes."""
+class CrossEntropyLoss:
+    """Binary cross-entropy loss for a single output probability."""
 
     def __init__(self) -> None:
         """Initialize the loss module."""
@@ -12,29 +12,35 @@ class CategoricalCrossEntropyLoss:
         self.targets = None
 
     def forward(self, predictions: np.ndarray, targets: np.ndarray) -> float:
-        """Compute the average categorical cross-entropy loss.
+        """Compute the average binary cross-entropy loss.
 
         Args:
-            predictions (np.ndarray): softmax probabilities,
-                shape (m, C). Clip away from exactly 0 before use.
-            targets (np.ndarray): one-hot true labels, shape
-                (m, C).
+            predictions (np.ndarray): predicted probabilities,
+                shape (m,) or (m, 1). Clip away from exactly
+                0 or 1 before use.
+            targets (np.ndarray): true labels, same shape as
+                predictions, values 0 or 1.
 
         Returns:
             float: the scalar loss, averaged over the batch.
         """
         self.predictions = np.clip(predictions, 1e-12, 1.0 - 1e-12)
         self.targets = targets
-        loss = -np.sum(targets * np.log(self.predictions), axis=1)
+        loss = -(
+            self.targets * np.log(self.predictions)
+            + (1.0 - self.targets) * np.log(1.0 - self.predictions)
+        )
         return float(np.mean(loss))
 
     def backward(self) -> np.ndarray:
         """Compute the gradient of the loss w.r.t. predictions.
 
         Returns:
-            np.ndarray: dL/da, shape (m, C), same shape as the
-                predictions passed to forward. Use the same
-                clipped predictions here as in forward.
+            np.ndarray: dL/da, same shape as the predictions
+                passed to forward.
         """
-        m = self.predictions.shape[0]
-        return -(1.0 / m) * (self.targets / self.predictions)
+        m = self.predictions.size
+        return -(1.0 / m) * (
+            self.targets / self.predictions
+            - (1.0 - self.targets) / (1.0 - self.predictions)
+        )
