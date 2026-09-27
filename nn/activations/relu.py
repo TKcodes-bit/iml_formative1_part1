@@ -1,6 +1,7 @@
 """ReLU activation: zeroes out negative values."""
 
 import numpy as np
+
 from nn.module import Module
 
 

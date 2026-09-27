@@ -1,6 +1,7 @@
 """Softmax activation: converts logits into a probability distribution."""
 
 import numpy as np
+
 from nn.module import Module
 
 
@@ -22,7 +23,6 @@ class Softmax(Module):
             np.ndarray: probabilities, shape (batch_size, C).
                 Each row sums to 1.
         """
-        # Max-subtraction trick for strict numerical stability against overflow
         x_max = np.max(x, axis=1, keepdims=True)
         exp_x = np.exp(x - x_max)
         self.a = exp_x / np.sum(exp_x, axis=1, keepdims=True)
@@ -39,6 +39,5 @@ class Softmax(Module):
             np.ndarray: gradient of the loss with respect to
                 this layer's input (the logits), shape (batch_size, C).
         """
-        # Vectorized batch implementation of the row-wise Jacobian dot-product
         sum_grad_a = np.sum(grad_output * self.a, axis=1, keepdims=True)
         return self.a * (grad_output - sum_grad_a)
